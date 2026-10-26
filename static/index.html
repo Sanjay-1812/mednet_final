@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MedNet | Packet Scheduling Lab</title>
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="MedNet home"><span class="brandmark">M<span>·</span></span><span>MedNet<small>PACKET SCHEDULING LAB</small></span></a><span class="local"><i></i> Local Python simulation</span></header>
+<main>
+<section class="intro"><div><p class="eyebrow">COMPUTER NETWORKS · FINAL PRODUCT</p><h1>Every packet has a deadline.<br><span>See how scheduling changes the outcome.</span></h1><p class="lede">Generate a synthetic traffic dataset, replay it through three schedulers, and compare delivery, delay, and loss on one shared link.</p></div><div class="model"><span>01</span><div>Shared link<br><strong>FIFO / Fixed priority / MedNet</strong></div></div></section>
+<div class="workspace">
+<aside class="panel controls">
+<div class="panel-heading"><div><p class="eyebrow">EXPERIMENT SETUP</p><h2>Configure traffic</h2></div><button id="reset" class="text-button" type="button">Reset</button></div>
+<form id="experiment">
+<label>Data source<select id="source"><option value="generate">Generated traffic</option><option value="replay">CSV replay</option></select></label>
+<div id="upload" hidden><label>Trace CSV<input type="file" id="dataset" accept=".csv,text/csv"></label><p class="help">Use the exported trace format. Set duration to cover every arrival. CSV times and deadlines are preserved.</p></div>
+<div class="fields"><label>Duration <span>s</span><input id="horizon" type="number" value="20" min="0.1" max="120" step="0.1" required></label><label class="generation">Random seed<input id="seed" type="number" value="42" min="0" max="2147483647" step="1" required></label></div>
+<div class="fields generation"><label>Normal load <span>×</span><input id="normal_load" type="number" value="1" min="0" max="10" step="0.1" required></label><label>Congested load <span>×</span><input id="congested_load" type="number" value="2.4" min="0" max="10" step="0.1" required></label></div>
+<div class="rule"></div>
+<div class="fields"><label>Link rate <span>Mbps</span><input id="link_mbps" type="number" value="1" min="0.01" max="100" step="0.01" required></label><label>Waiting slots<input id="queue_capacity" type="number" value="40" min="0" max="200" step="1" required></label></div>
+<details id="advanced"><summary>MedNet score settings</summary><label>Urgency weight<input id="urgency_weight" type="number" value="3" min="0" max="10" step="0.05" required></label><label>Critical congestion boost<input id="critical_boost" type="number" value="0.75" min="0" max="10" step="0.05" required></label><label>Congestion threshold <span>fraction</span><input id="congestion_threshold" type="number" value="0.75" min="0" max="0.99" step="0.01" required></label><p class="help">Score = base priority + urgency weight × elapsed deadline fraction + critical boost × congestion factor.</p></details>
+<button class="primary" id="run" type="submit">Run comparison <span aria-hidden="true">→</span></button>
+<button class="secondary" id="example" type="button">Use saved dataset</button>
+<p class="help">The saved dataset contains 4,750 packets. This button restores the reference settings and replays those exact rows.</p>
+</form>
+<div class="scope"><strong>About the model</strong><p>Six synthetic traffic classes. One non-preemptive link, a finite waiting queue, and tail-drop admission. Parameters are experimental; the data is not measured hospital traffic.</p><button id="about-toggle" class="text-button" type="button" aria-expanded="false">View traffic classes ↓</button><div id="class-definitions" hidden></div></div>
+</aside>
+<section class="results" aria-label="Experiment results">
+<div id="status" class="status" role="status" aria-live="polite">Ready to compare. Loading the saved reference dataset…</div>
+<div id="error" class="error" role="alert" hidden></div>
+<div id="empty" class="panel empty" hidden><h2>Your comparison will appear here</h2><p>Choose your settings and run an experiment.</p></div>
+<div id="results-content" hidden>
+<div class="result-heading"><div><p class="eyebrow">COMPARISON RESULTS</p><h2 id="result-title">Congested scenario</h2></div><div class="tabs" role="group" aria-label="Scenario"><button id="tab-normal" data-scenario="normal" type="button" aria-pressed="false">Normal</button><button id="tab-congested" data-scenario="congested" type="button" aria-pressed="true">Congested</button></div></div>
+<p id="run-context" class="context"></p>
+<div class="stats"><div><span>Generated packets</span><strong id="packet-count">—</strong><small>Same trace for every policy</small></div><div><span>Offered traffic</span><strong id="offered-load">—</strong><small id="load-detail">—</small></div><div><span>MedNet on-time success</span><strong id="success">—</strong><small id="success-detail">—</small></div></div>
+<div class="panel chart-panel"><div class="panel-heading"><div><h3>On-time delivery</h3><p>Percentage of all generated packets, including drops in the denominator.</p></div><div class="legend"><span class="fifo">FIFO</span><span class="priority">Fixed priority</span><span class="mednet">MedNet</span></div></div><div id="chart"></div><p class="help" id="chart-note"></p></div>
+<div class="panel"><div class="panel-heading"><div><h3>Whole-run comparison</h3><p>Delay is measured only for delivered packets.</p></div><a id="metrics-download" class="text-button" download>Metrics CSV ↗</a></div><div class="table-wrap"><table><caption class="sr-only">Scheduler totals for selected scenario</caption><thead><tr><th>Scheduler</th><th>On time</th><th>Late</th><th>Dropped</th><th>Mean delay</th><th>Throughput</th></tr></thead><tbody id="summary-body"></tbody></table></div></div>
+<div class="panel"><div class="panel-heading"><div><h3>Traffic class detail</h3><p>Compare each class across the three policies.</p></div><label class="inline-label">Show<select id="class-metric"><option value="mean_delay_ms">Mean delay (ms)</option><option value="p95_delay_ms">95th percentile delay (ms)</option><option value="on_time_success_pct">On-time success (%)</option><option value="buffer_dropped">Buffer drops (packets)</option></select></label></div><div class="table-wrap"><table><caption class="sr-only">Per-class scheduler comparison</caption><thead><tr><th>Traffic class</th><th>Generated</th><th>FIFO</th><th>Fixed priority</th><th>MedNet</th></tr></thead><tbody id="class-body"></tbody></table></div><p class="table-note">No deliveries: delay is shown as “—”. Late packets stay eligible for service; deadlines do not trigger drops.</p></div>
+<details class="panel packet-panel"><summary>Inspect packet outcomes <span>First 100 arrivals per scenario and policy</span></summary><div class="packet-inner"><label class="inline-label">Scheduler<select id="packet-policy"><option value="mednet">MedNet</option><option value="priority">Fixed priority</option><option value="fifo">FIFO</option></select></label><div class="table-wrap packet-scroll"><table><caption class="sr-only">Packet-level delivery outcomes</caption><thead><tr><th>ID</th><th>Class</th><th>Arrival (s)</th><th>Delay (ms)</th><th>Outcome</th></tr></thead><tbody id="packet-body"></tbody></table></div><p class="help">The download includes every packet outcome.</p></div></details>
+<div class="download-panel"><div><h3>Keep this experiment</h3><p>Dataset, metrics, all packet outcomes, and configuration.</p></div><a id="download" class="primary" download>Download results ZIP ↓</a></div>
+<p class="fineprint" id="fingerprint"></p>
+</div>
+</section>
+</div>
+<footer><span>MedNet · Synthetic Traffic Dataset</span><span>Python standard library · Runs locally · No external services</span></footer>
+</main>
+</body></html>

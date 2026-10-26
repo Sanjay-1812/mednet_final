@@ -1,0 +1,68 @@
+{
+  "input_origin": "generated",
+  "input_dataset": null,
+  "seed": 42,
+  "arrival_horizon_s": 20.0,
+  "link_bps": 1000000.0,
+  "waiting_capacity_packets": 40,
+  "score": {
+    "urgency_weight": 3.0,
+    "critical_boost": 0.75,
+    "congestion_threshold": 0.75
+  },
+  "classes": {
+    "emergency": {
+      "priority": 5,
+      "packet_bytes": 256,
+      "rate_per_s": 3,
+      "deadline_ms": 80
+    },
+    "monitoring": {
+      "priority": 5,
+      "packet_bytes": 512,
+      "rate_per_s": 12,
+      "deadline_ms": 150
+    },
+    "video": {
+      "priority": 4,
+      "packet_bytes": 1200,
+      "rate_per_s": 32,
+      "deadline_ms": 200
+    },
+    "images": {
+      "priority": 3,
+      "packet_bytes": 1400,
+      "rate_per_s": 16,
+      "deadline_ms": 600
+    },
+    "records": {
+      "priority": 2,
+      "packet_bytes": 1000,
+      "rate_per_s": 5,
+      "deadline_ms": 1000
+    },
+    "admin": {
+      "priority": 1,
+      "packet_bytes": 700,
+      "rate_per_s": 3,
+      "deadline_ms": 1500
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "normal",
+      "load_multiplier": 1.0,
+      "offered_mbps": 0.5703195999999999
+    },
+    {
+      "scenario": "congested",
+      "load_multiplier": 2.4,
+      "offered_mbps": 1.4400671999999999
+    }
+  ],
+  "model": "One nonpreemptive link; finite waiting queue; tail drop; no expiry drops.",
+  "deadline_note": "All deadlines and traffic parameters are synthetic, not clinical targets.",
+  "dataset_note": "Synthetic experiment data, not calibrated to real hospital measurements. Class priorities apply in both modes; class size/rate/deadline settings are generator defaults only. Replay uses CSV arrival times, sizes and absolute deadlines.",
+  "observation": "0 to max(arrival horizon, final completion), separately for each policy.",
+  "metric_notes": "Delay statistics cover delivered packets; on-time success divides by all generated packets. Every class has a deadline, so deadline_buffer_drops equals buffer_dropped. Link time percent is class transmission time / observation; ALL is link utilization. Throughput includes all delivered bytes over the same observation interval."
+}

@@ -1,0 +1,84 @@
+{
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "loads": [
+    1.0,
+    1.8,
+    2.4,
+    3.0
+  ],
+  "arrival_horizon_s": 20.0,
+  "link_bps": 1000000.0,
+  "waiting_capacity_packets": 40,
+  "score": {
+    "urgency_weight": 3.0,
+    "critical_boost": 0.75,
+    "congestion_threshold": 0.75
+  },
+  "policies": [
+    "fifo",
+    "priority",
+    "mednet"
+  ],
+  "classes": {
+    "emergency": {
+      "priority": 5,
+      "packet_bytes": 256,
+      "rate_per_s": 3,
+      "deadline_ms": 80
+    },
+    "monitoring": {
+      "priority": 5,
+      "packet_bytes": 512,
+      "rate_per_s": 12,
+      "deadline_ms": 150
+    },
+    "video": {
+      "priority": 4,
+      "packet_bytes": 1200,
+      "rate_per_s": 32,
+      "deadline_ms": 200
+    },
+    "images": {
+      "priority": 3,
+      "packet_bytes": 1400,
+      "rate_per_s": 16,
+      "deadline_ms": 600
+    },
+    "records": {
+      "priority": 2,
+      "packet_bytes": 1000,
+      "rate_per_s": 5,
+      "deadline_ms": 1000
+    },
+    "admin": {
+      "priority": 1,
+      "packet_bytes": 700,
+      "rate_per_s": 3,
+      "deadline_ms": 1500
+    }
+  },
+  "trace_count": 40,
+  "simulation_count": 120,
+  "python_version": "3.14.3",
+  "mednet_source_sha256": "8d5f721e04c00a9dadad7408be3434017aa1e57d9ef4305108ca7a4f8adfebcc",
+  "experiment_source_sha256": "d36a96f56e2109cef32e83f6ff7746e60e1f21cadd42690d432f5d200f2c1e6e",
+  "trace_hash_method": "SHA256 of UTF-8 compact JSON list of Packet dataclass dictionaries, trace order.",
+  "pairing": "Generate once per seed/load, then reuse identical packets for all three policies.",
+  "summary_method": "Unweighted mean and sample standard deviation across seeds; n=1 SD is 0 by convention. Per-run p95 delays are averaged, not pooled into a common percentile. These SDs are descriptive, not confidence intervals or significance tests.",
+  "paired_method": "candidate minus baseline, first calculated within each seed/load; positive on_time_success_pct_delta means improvement in percentage points. Negative mean_delay_ms_delta means lower delivered-packet delay.",
+  "model": "One nonpreemptive link; finite waiting queue with tail drop; arrivals stop then admitted packets drain.",
+  "observation": "Each run uses 0 to max(arrival horizon, last completion).",
+  "metric_note": "On-time success divides by all generated packets including tail drops as failures. Delay statistics describe delivered packets. All classes have synthetic deadlines.",
+  "provenance": "Artificial traffic generated in Python. No clinical targets, hospital measurements, or patient data. The experiment does not establish hospital performance or safety."
+}
